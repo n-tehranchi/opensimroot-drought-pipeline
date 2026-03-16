@@ -17,9 +17,7 @@ IMAGE="${DOCKER_IMAGE:-nntehranchi/opensimroot-drought:latest}"
 GPU="${GPU_COUNT:-0}"
 CPU="${CPU_COUNT:-2}"
 MEMORY="${MEMORY_LIMIT:-4Gi}"
-PVC_NAME="${PVC_NAME:-opensimroot-data}"
-PVC_MOUNT="${PVC_MOUNT:-/sim}"
-INPUT_DIR="${INPUT_DIR:-/home/jovyan/work/inputs}"
+OUTPUT_PATH="${OUTPUT_PATH:-/home/jovyan/work/outputs}"
 NAMESPACE="${RUNAI_NAMESPACE:-runai-busch-lab}"
 DRY_RUN="${DRY_RUN:-false}"
 
@@ -44,7 +42,7 @@ echo "OpenSimRoot Drought Pipeline - Batch Submit"
 echo "  Project:    ${PROJECT}"
 echo "  Image:      ${IMAGE}"
 echo "  Resources:  ${CPU} CPU, ${MEMORY} RAM, ${GPU} GPU"
-echo "  Input dir:  ${INPUT_DIR}"
+echo "  Output dir: ${OUTPUT_PATH}"
 echo "  Envs:       ${NUM_ENVS} (0-$(( NUM_ENVS - 1 )))"
 echo "  Phenotypes: ${NUM_PHENOTYPES} (0-$(( NUM_PHENOTYPES - 1 )))"
 echo "  Replicates: ${NUM_REPLICATES} (0-$(( NUM_REPLICATES - 1 )))"
@@ -65,13 +63,14 @@ for env in $(seq 0 $(( NUM_ENVS - 1 ))); do
             echo -n "Submitting ${JOB_NAME} (${XML_FILE}) ... "
 
             CMD=(
-                runai submit "${JOB_NAME}"
+                runai training submit "${JOB_NAME}"
                 --project "${PROJECT}"
                 --image "${IMAGE}"
-                --cpu "${CPU}"
-                --memory "${MEMORY}"
-                --pvc "${PVC_NAME}:${PVC_MOUNT}"
-                -e INPUT_FILE="${INPUT_DIR}/${XML_FILE}"
+                --image-pull-policy Always
+                --cpu-core-request "${CPU}"
+                --cpu-memory-request "${MEMORY}"
+                -e INPUT_FILE="${XML_FILE}"
+                -e OUTPUT_PATH="${OUTPUT_PATH}"
             )
 
             if [[ "${GPU}" -gt 0 ]]; then
