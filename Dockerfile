@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-RUN git clone --branch master https://github.com/n-tehranchi/OpenSimRoot.git
+RUN git clone --branch schafer2022-reproduction https://github.com/n-tehranchi/OpenSimRoot.git
 
 WORKDIR /build/OpenSimRoot
 RUN find /usr/include -name 'Python.h'
